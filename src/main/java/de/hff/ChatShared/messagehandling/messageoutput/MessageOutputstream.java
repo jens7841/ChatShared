@@ -17,7 +17,7 @@ public class MessageOutputstream extends FilterOutputStream {
 		output = new DataOutputStream(new BufferedOutputStream(out));
 	}
 
-	public void writeMessage(Message message) throws IOException {
+	public synchronized void writeMessage(Message message) throws IOException {
 		output.write(message.getType().getTypeNumber());
 		output.writeInt(message.getBytes().length);
 		output.write(message.getBytes());
