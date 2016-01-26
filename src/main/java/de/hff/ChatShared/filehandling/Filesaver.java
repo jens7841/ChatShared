@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.Semaphore;
 
 public class Filesaver extends Thread {
 
@@ -15,6 +16,7 @@ public class Filesaver extends Thread {
 	private BlockingQueue<byte[]> buffer;
 	private File file;
 	private long receivedBytes;
+	private Semaphore lock = new Semaphore(1);
 
 	public Filesaver(File file) throws FileNotFoundException {
 		this.file = file;
@@ -37,6 +39,7 @@ public class Filesaver extends Thread {
 		try {
 			receivedBytes += pack.length;
 			buffer.put(pack);
+			lock.release();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -48,6 +51,7 @@ public class Filesaver extends Thread {
 
 	public void endSave() {
 		this.running = false;
+		lock.release();
 	}
 
 	@Override
@@ -56,9 +60,9 @@ public class Filesaver extends Thread {
 		try {
 
 			out = new BufferedOutputStream(new FileOutputStream(file));
-			while (running) {
+			while (running || buffer.size() != 0) {
+				lock.acquire();
 				while (buffer.size() > 0) {
-
 					out.write(buffer.take());
 
 				}
