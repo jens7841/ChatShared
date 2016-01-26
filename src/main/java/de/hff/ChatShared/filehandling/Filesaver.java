@@ -14,6 +14,7 @@ public class Filesaver extends Thread {
 	private boolean running;
 	private BlockingQueue<byte[]> buffer;
 	private File file;
+	private long receivedBytes;
 
 	public Filesaver(File file) throws FileNotFoundException {
 		this.file = file;
@@ -27,7 +28,6 @@ public class Filesaver extends Thread {
 	}
 
 	public void savePackage(byte[] pack) throws IOException {
-
 		if (getState() == State.NEW) {
 			start();
 		} else if (getState() == State.TERMINATED) {
@@ -35,10 +35,15 @@ public class Filesaver extends Thread {
 		}
 
 		try {
+			receivedBytes += pack.length;
 			buffer.put(pack);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public long getReceivedBytes() {
+		return receivedBytes;
 	}
 
 	public void endSave() {
