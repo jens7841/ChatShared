@@ -2,7 +2,6 @@ package de.hff.ChatShared.filehandling;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -18,7 +17,7 @@ public class Filesaver extends Thread {
 	private long receivedBytes;
 	private Semaphore lock = new Semaphore(1);
 
-	public Filesaver(File file) throws FileNotFoundException {
+	public Filesaver(File file) {
 		this.file = file;
 		this.buffer = new LinkedBlockingQueue<>();
 	}
@@ -35,7 +34,6 @@ public class Filesaver extends Thread {
 		} else if (getState() == State.TERMINATED) {
 			throw new IllegalStateException("Filesaver-Thread has stopped running");
 		}
-
 		try {
 			receivedBytes += pack.length;
 			buffer.put(pack);
