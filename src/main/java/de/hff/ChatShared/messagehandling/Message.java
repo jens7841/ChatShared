@@ -3,6 +3,8 @@ package de.hff.ChatShared.messagehandling;
 import java.io.UnsupportedEncodingException;
 
 public class Message {
+
+	private static final String ENCODING = "UTF-8";
 	private byte[] message;
 	private MessageType type;
 
@@ -15,7 +17,7 @@ public class Message {
 
 		try {
 
-			this.message = message.getBytes("UTF-8");
+			this.message = message.getBytes(ENCODING);
 			this.type = type;
 
 		} catch (UnsupportedEncodingException e) {
@@ -46,7 +48,7 @@ public class Message {
 	public String toString() {
 
 		try {
-			return new String(getBytes(), "UTF-8");
+			return new String(getBytes(), ENCODING);
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}

@@ -11,7 +11,7 @@ import de.hff.ChatShared.messagehandling.MessageType;
 
 public class MessageInputStream extends FilterInputStream {
 
-	DataInputStream input;;
+	private DataInputStream input;
 
 	public MessageInputStream(InputStream in) {
 		super(in);
