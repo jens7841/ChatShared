@@ -15,8 +15,9 @@ public class MessageReceiverTest {
 	public void testTextMessage() throws Throwable {
 
 		String text = "Hallo Wie gehts!? öäüÖÄÜ´´``*'+# /*-*\\";
+		MessageType messageType = MessageType.CHAT_MESSAGE;
 
-		ByteArrayInputStream in = new ByteArrayInputStream(getMessageInput(text.getBytes("UTF-8")));
+		ByteArrayInputStream in = new ByteArrayInputStream(getMessageInput(text.getBytes("UTF-8"), messageType));
 
 		MessageReceiver messageReceiver = new MessageReceiver(new MessageInputStream(in));
 
@@ -27,6 +28,7 @@ public class MessageReceiverTest {
 
 				/** Test */
 				Assert.assertEquals(text.toString(), message.toString());
+				Assert.assertEquals(messageType, message.getType());
 
 			}
 		});
@@ -34,9 +36,9 @@ public class MessageReceiverTest {
 		messageReceiver.receiveMessage();
 	}
 
-	private byte[] getMessageInput(byte[] input) {
+	private byte[] getMessageInput(byte[] input, MessageType messageType) {
 		int textLength = input.length;
-		byte[] byteInput = ByteBuffer.allocate(textLength + 5).put((byte) MessageType.CHAT_MESSAGE.getTypeNumber())
+		byte[] byteInput = ByteBuffer.allocate(textLength + 5).put((byte) messageType.getTypeNumber())
 				.putInt(textLength).put(input).array();
 		return byteInput;
 	}
