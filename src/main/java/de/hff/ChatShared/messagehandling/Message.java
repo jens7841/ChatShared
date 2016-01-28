@@ -4,7 +4,7 @@ import java.io.UnsupportedEncodingException;
 
 public class Message {
 
-	private static final String ENCODING = "UTF-8";
+	public static final String ENCODING = "UTF-8";
 	private byte[] message;
 	private MessageType type;
 
@@ -54,4 +54,5 @@ public class Message {
 		}
 		return new String(getBytes());
 	}
+
 }
