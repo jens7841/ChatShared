@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import de.hff.ChatShared.messagehandling.Message;
@@ -14,7 +15,6 @@ import de.hff.ChatShared.messagehandling.MessageType;
 import de.hff.ChatShared.messagehandling.messageinput.MessageInputStream;
 import de.hff.ChatShared.messagehandling.messageoutput.MessageOutputstream;
 import de.hff.ChatShared.messagehandling.messageoutput.MessageSender;
-import junit.framework.Assert;
 
 public class UploaderTest {
 
@@ -33,11 +33,17 @@ public class UploaderTest {
 		TransferFile transferFile = new TransferFile(file, file.length(), expectedId);
 		Uploader uploader = new Uploader(sender, transferFile, 1024 * 1024);
 		uploader.start();
-		Thread.sleep(2000);
+
+		while (uploader.isAlive()) {
+			Thread.yield();
+		}
 
 		MessageInputStream messageIn = new MessageInputStream(new ByteArrayInputStream(byteOut.toByteArray()));
 		Message message = null;
 		message = messageIn.readMessage();
+
+		System.out.println(message.getType());
+		System.out.println(message.getBytes().length);
 
 		DataInputStream in = new DataInputStream(new ByteArrayInputStream(message.getBytes()));
 		MessageType type = message.getType();
