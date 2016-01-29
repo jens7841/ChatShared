@@ -48,6 +48,14 @@ public class FileManager {
 		return null;
 	}
 
+	public TransferFile getUploadFile(int id) {
+		for (TransferFile transferFile : uploadFiles) {
+			if (transferFile.getId() == id)
+				return transferFile;
+		}
+		return null;
+	}
+
 	public Filesaver getFilesaver(TransferFile file) {
 		return downloadFilesaver.get(file);
 	}
