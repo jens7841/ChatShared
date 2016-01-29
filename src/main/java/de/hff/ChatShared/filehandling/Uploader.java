@@ -15,7 +15,7 @@ public class Uploader extends Thread {
 
 	private TransferFile file;
 	private MessageSender sender;
-	private int bufferSize;
+	private final int bufferSize;
 
 	public Uploader(MessageSender sender, TransferFile file, int bufferSize) {
 		this.bufferSize = bufferSize;
@@ -29,23 +29,21 @@ public class Uploader extends Thread {
 			InputStream in = new BufferedInputStream(new FileInputStream(file.getFile()));
 
 			byte[] buffer = new byte[bufferSize];
-			double expectedPackages = (double) file.getFile().length() / bufferSize;
-
-			int packages = 0;
+			long expectedBytes = file.getFile().length();
+			long sendBytes = 0;
 
 			do {
-
 				int readBytes = in.read(buffer);
 				ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 				DataOutputStream out = new DataOutputStream(byteArrayOutputStream);
 				out.writeInt(file.getId());
 				out.writeInt(readBytes);
-				out.write(buffer);
+				out.write(buffer, 0, readBytes);
 
-				sender.sendMessage(new Message(byteArrayOutputStream.toByteArray(), MessageType.DOWNLOAD_PACKAGE));
-				packages++;
+				sender.sendMessage(new Message(byteArrayOutputStream.toByteArray(), MessageType.UPLOAD_PACKAGE));
+				sendBytes += readBytes;
 
-			} while (packages < expectedPackages);
+			} while (sendBytes < expectedBytes);
 
 			in.close();
 

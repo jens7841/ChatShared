@@ -11,6 +11,7 @@ public class TransferFile {
 	public TransferFile(File file, long expectedLength, int id) {
 		this.file = file;
 		this.expectedLength = expectedLength;
+		this.id = id;
 	}
 
 	public File getFile() {
