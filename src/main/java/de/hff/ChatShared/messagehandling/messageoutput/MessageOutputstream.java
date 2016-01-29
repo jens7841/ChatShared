@@ -10,14 +10,12 @@ import de.hff.ChatShared.messagehandling.Message;
 
 public class MessageOutputstream extends FilterOutputStream {
 
-	private DataOutputStream output;
-
 	public MessageOutputstream(OutputStream out) {
-		super(out);
-		output = new DataOutputStream(new BufferedOutputStream(out));
+		super(new DataOutputStream(new BufferedOutputStream(out)));
 	}
 
 	public synchronized void writeMessage(Message message) throws IOException {
+		DataOutputStream output = (DataOutputStream) out;
 		output.write(message.getType().getTypeNumber());
 		output.writeInt(message.getBytes().length);
 		output.write(message.getBytes());

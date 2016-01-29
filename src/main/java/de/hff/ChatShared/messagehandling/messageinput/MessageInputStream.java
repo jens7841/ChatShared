@@ -11,14 +11,13 @@ import de.hff.ChatShared.messagehandling.MessageType;
 
 public class MessageInputStream extends FilterInputStream {
 
-	private DataInputStream input;
-
 	public MessageInputStream(InputStream in) {
-		super(in);
-		input = new DataInputStream(new BufferedInputStream(in, 65536));
+		super(new DataInputStream(new BufferedInputStream(in)));
 	}
 
 	public Message readMessage() throws IOException {
+		DataInputStream input = (DataInputStream) in;
+
 		byte[] arr;
 		int messageType = input.read();
 		if (messageType == -1)
