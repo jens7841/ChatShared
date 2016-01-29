@@ -21,7 +21,7 @@ public class UploaderTest {
 	private ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
 	private MessageOutputstream out = new MessageOutputstream(byteOut);
 	private MessageSender sender = new MessageSender(out);
-	private File file = new File("test.txt");
+	private File file = new File("src/test/resources/test.txt");
 
 	@Test
 	public void testSinglePackage() throws IOException, InterruptedException {
@@ -47,6 +47,41 @@ public class UploaderTest {
 		DataInputStream in = new DataInputStream(new ByteArrayInputStream(message.getBytes()));
 		MessageType type = message.getType();
 		int id = in.readInt();
+		Assert.assertEquals(expectedId, id);
+
+		int packLen = in.readInt();
+		Assert.assertEquals(file.length(), packLen);
+
+		byte[] pack = new byte[packLen];
+		in.readFully(pack);
+
+		Assert.assertArrayEquals(hallo.getBytes(), pack);
+	}
+
+	@Test
+	public void testMultiPackage() throws IOException {
+
+		FileWriter writer = new FileWriter(file);
+		String hallo = "HALLOHALLOHALLOHALLOHALLOHALLOHALLO";
+		writer.write(hallo);
+		writer.close();
+
+		int expectedId = 1;
+		TransferFile transferFile = new TransferFile(file, file.length(), expectedId);
+		Uploader uploader = new Uploader(sender, transferFile, 3);
+		uploader.start();
+
+		while (uploader.isAlive()) {
+			Thread.yield();
+		}
+		// FIXME Irgendwie die packages lesen und vergleichen....
+		MessageInputStream messageIn = new MessageInputStream(new ByteArrayInputStream(byteOut.toByteArray()));
+		Message message = null;
+		message = messageIn.readMessage();
+
+		DataInputStream in = new DataInputStream(new ByteArrayInputStream(message.getBytes()));
+		MessageType type = message.getType();
+		int id = in.readInt();
 		int packLen = in.readInt();
 		byte[] pack = new byte[packLen];
 		in.readFully(pack);
@@ -54,10 +89,5 @@ public class UploaderTest {
 		Assert.assertEquals(expectedId, id);
 		Assert.assertEquals(file.length(), packLen);
 		Assert.assertArrayEquals(hallo.getBytes(), pack);
-	}
-
-	@Test
-	public void testMultiPackage() {
-
 	}
 }
