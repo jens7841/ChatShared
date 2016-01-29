@@ -18,15 +18,17 @@ import de.hff.ChatShared.messagehandling.messageoutput.MessageSender;
 
 public class UploaderTest {
 
-	@Test
-	public void test() throws IOException, InterruptedException {
-		ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-		MessageOutputstream out = new MessageOutputstream(byteOut);
-		MessageSender sender = new MessageSender(out);
+	private ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+	private MessageOutputstream out = new MessageOutputstream(byteOut);
+	private MessageSender sender = new MessageSender(out);
+	private File file = new File("test.txt");
 
-		File file = new File("test.txt");
+	@Test
+	public void testSinglePackage() throws IOException, InterruptedException {
+
 		FileWriter writer = new FileWriter(file);
-		writer.write("HALLO");
+		String hallo = "HALLO";
+		writer.write(hallo);
 		writer.close();
 
 		int expectedId = 1;
@@ -42,17 +44,20 @@ public class UploaderTest {
 		Message message = null;
 		message = messageIn.readMessage();
 
-		System.out.println(message.getType());
-		System.out.println(message.getBytes().length);
-
 		DataInputStream in = new DataInputStream(new ByteArrayInputStream(message.getBytes()));
 		MessageType type = message.getType();
 		int id = in.readInt();
-		// int packLen = in.readInt();
-		// byte[] pack = new byte[packLen];
-		// in.readFully(pack);
+		int packLen = in.readInt();
+		byte[] pack = new byte[packLen];
+		in.readFully(pack);
 
 		Assert.assertEquals(expectedId, id);
+		Assert.assertEquals(file.length(), packLen);
+		Assert.assertArrayEquals(hallo.getBytes(), pack);
 	}
 
+	@Test
+	public void testMultiPackage() {
+
+	}
 }
