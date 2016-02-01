@@ -41,20 +41,19 @@ public class UploaderTest {
 		}
 
 		MessageInputStream messageIn = new MessageInputStream(new ByteArrayInputStream(byteOut.toByteArray()));
-		Message message = null;
-		message = messageIn.readMessage();
+		Message message = messageIn.readMessage();
 
 		DataInputStream in = new DataInputStream(new ByteArrayInputStream(message.getBytes()));
 		MessageType type = message.getType();
 		int id = in.readInt();
-		Assert.assertEquals(expectedId, id);
 
 		int packLen = in.readInt();
-		Assert.assertEquals(file.length(), packLen);
 
 		byte[] pack = new byte[packLen];
 		in.readFully(pack);
 
+		Assert.assertEquals(expectedId, id);
+		Assert.assertEquals(file.length(), packLen);
 		Assert.assertArrayEquals(hallo.getBytes(), pack);
 	}
 
@@ -68,26 +67,30 @@ public class UploaderTest {
 
 		int expectedId = 1;
 		TransferFile transferFile = new TransferFile(file, file.length(), expectedId);
-		Uploader uploader = new Uploader(sender, transferFile, 3);
+		int bufferSize = 3;
+		Uploader uploader = new Uploader(sender, transferFile, bufferSize);
 		uploader.start();
 
 		while (uploader.isAlive()) {
 			Thread.yield();
 		}
-		// FIXME Irgendwie die packages lesen und vergleichen....
+
 		MessageInputStream messageIn = new MessageInputStream(new ByteArrayInputStream(byteOut.toByteArray()));
-		Message message = null;
-		message = messageIn.readMessage();
 
-		DataInputStream in = new DataInputStream(new ByteArrayInputStream(message.getBytes()));
-		MessageType type = message.getType();
-		int id = in.readInt();
-		int packLen = in.readInt();
-		byte[] pack = new byte[packLen];
-		in.readFully(pack);
+		int overallLength = 0;
+		for (int i = 0; i < hallo.length(); i += bufferSize) {
+			Message message = messageIn.readMessage();
 
-		Assert.assertEquals(expectedId, id);
-		Assert.assertEquals(file.length(), packLen);
-		Assert.assertArrayEquals(hallo.getBytes(), pack);
+			DataInputStream in = new DataInputStream(new ByteArrayInputStream(message.getBytes()));
+			MessageType type = message.getType();
+			int id = in.readInt();
+			int packLen = in.readInt();
+			byte[] pack = new byte[packLen];
+			in.readFully(pack);
+			overallLength += packLen;
+
+			Assert.assertEquals(expectedId, id);
+		}
+		Assert.assertEquals(file.length(), overallLength);
 	}
 }
