@@ -78,6 +78,7 @@ public class UploaderTest {
 		MessageInputStream messageIn = new MessageInputStream(new ByteArrayInputStream(byteOut.toByteArray()));
 
 		int overallLength = 0;
+		StringBuilder stringBuilder = new StringBuilder();
 		for (int i = 0; i < hallo.length(); i += bufferSize) {
 			Message message = messageIn.readMessage();
 
@@ -89,8 +90,11 @@ public class UploaderTest {
 			in.readFully(pack);
 			overallLength += packLen;
 
+			stringBuilder.append(new String(pack, "UTF-8"));
+
 			Assert.assertEquals(expectedId, id);
 		}
 		Assert.assertEquals(file.length(), overallLength);
+		Assert.assertEquals(hallo, stringBuilder.toString());
 	}
 }
